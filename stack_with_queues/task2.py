@@ -1,15 +1,16 @@
 '''
 Task link:
-https://leetcode.com/problems/implement-queue-using-stacks/
+https://leetcode.com/problems/implement-stack-using-queues/description/
 '''
 class Node:
     '''
     Linked list node.
     '''
 
-    def __init__(self, data=None, next_el=None) -> None:
+    def __init__(self, data=None) -> None:
         self.data = data
-        self.next = next_el
+        self.next = None
+        self.prev = None
 
     def __iter__(self):
         '''
@@ -21,7 +22,7 @@ class Node:
             current = current.next
 
     def __repr__(self) -> str:
-        return f'{self. data} -> {repr(self.next)}'
+        return f'({self. data}) -> {repr(self.next)}'
 
     def push(self, node: 'Node'):
         '''
@@ -29,30 +30,22 @@ class Node:
         '''
         if isinstance(node, Node):
             node.next = self
+            node.next.prev = node
             return node
-
-    def append(self, node: 'Node'):
-        '''
-        Appends node to the end.
-        '''
-        if isinstance(node, Node):
-            current = self
-            while current and current.next:
-                current = current.next
-            current.next = node
 
     def copy(self):
         '''
         Creates a copy of the node.
         '''
-        new_mono = Node(self.data)
+        new_node = Node(self.data)
         if self.next:
-            new_mono.next = self.next.copy()
-        return new_mono
+            new_node.next = self.next.copy()
+            new_node.next.prev = new_node
+        return new_node
 
-class Stack:
+class Queue:
     '''
-    My stack implementation using linked list.
+    Class for queue.
     '''
 
     def __init__(self) -> None:
@@ -84,132 +77,121 @@ class Stack:
         head += ']'
         return head
 
-    def __repr__(self) -> str:
-        return str(self)
-
     def is_empty(self) -> bool:
         '''
-        Checks whether stack is empty.
+        Checks whether queue is empty.
         '''
         return not bool(self.head)
 
-    def push(self, data) -> None:
+    def add(self, data):
         '''
-        Adds data to the head of stack.
+        Adds element to the queue end.
         '''
-        new_node = Node(data)
         if self.head:
-            self.head = self.head.push(new_node)
+            self.head = self.head.push(Node(data))
         else:
-            self.head = new_node
+            self.head = Node(data)
 
     def pop(self):
         '''
-        Removes and return an element from
-        head of the stack.
+        Removes and returns queue head element.
         '''
+        result = None
         if self.head:
-            data = self.head.data
+            result = self.head.data
             self.head = self.head.next
-            return data
-        return None
+            if self.head:
+                self.head.prev = None
+        return result
 
     def peek(self):
         '''
-        Returns the top element of the stack.
+        Returns queue head element.
         '''
         if self.head:
             return self.head.data
         return None
 
-    def copy(self):
+    def copy(self) -> 'Queue':
         '''
-        Returns a copy of stack.
+        Returns a copy of queue.
         '''
-        new_stack = Stack()
-        new_stack.head = self.head.copy()
-        return new_stack
+        result = Queue()
+        result.head = self.head.copy() if self.head else None
+        return result
 
-class MyQueue:
-    '''
-    My queue class.
-    '''
+class MyStack(object):
+
     def __init__(self):
-        self.default_stack = Stack()
-        self.reversed_stack = Stack()
+        self.default_stack = Queue()
+        self.reversed_stack = Queue()
 
     def __str__(self) -> str:
         return str(self.default_stack)
 
     def __repr__(self) -> str:
-        return repr(self.default_stack)
+        return str(self)
 
     def __iter__(self):
         for k in self.default_stack:
             yield k
 
-    def push(self, data):
-        '''
-        Pushes element into the queue end.
-        '''
-        self.default_stack.push(data)
-        dummy = self.default_stack.copy() if self.default_stack else None
-        new_stack = Stack()
+    def push(self, x):
+        """
+        :type x: int
+        :rtype: None
+        """
+        self.reversed_stack.add(x)
+        dummy = self.reversed_stack.copy() if self.reversed_stack else None
+        self.default_stack = Queue()
         while dummy and not dummy.is_empty():
-            new_stack.push(dummy.pop())
-        self.reversed_stack = new_stack
+            self.default_stack.add(dummy.pop())
 
     def pop(self):
-        '''
-        Pops queue head element.
-        '''
+        """
+        :rtype: int
+        """
         result = self.reversed_stack.pop()
         dummy = self.reversed_stack.copy() if self.reversed_stack else None
-        new_stack = Stack()
+        self.default_stack = Queue()
         while dummy and not dummy.is_empty():
-            new_stack.push(dummy.pop())
-        self.default_stack = new_stack
+            self.default_stack.add(dummy.pop())
         return result
 
-    def peek(self):
-        '''
-        Peek in queue.
-        '''
+    def top(self):
+        """
+        :rtype: int
+        """
         return self.reversed_stack.peek()
 
     def empty(self):
-        '''
-        Checks whether queue is empty.
-        '''
+        """
+        :rtype: bool
+        """
         return self.default_stack.is_empty() and self.reversed_stack.is_empty()
 
 
-
-# Your MyQueue object will be instantiated and called as such:
-# obj = MyQueue()
+# Your MyStack object will be instantiated and called as such:
+# obj = MyStack()
 # obj.push(1)
 # obj.push(2)
-# obj.push(3)
-# obj.push(4)
-# obj.push(5)
-# obj.pop()
-# obj.pop()
-# print(obj)
-# print(obj.peek())
+# param_3 = obj.top()
+# param_2 = obj.pop()
+# param_4 = obj.empty()
+# print()
 
-
-# stack = Stack()
-# stack.push(5)
-# stack.push(7)
+# stack = Queue()
+# stack.add(5)
+# stack.add(7)
 # print(f'Check1 - {stack}')
 # print(stack.peek(), ' peek1')
 # print(stack.pop(), ' pop1')
 # print(f'Check2 - {stack}')
 # print(stack.peek(), ' peek2')
-# stack.push(stack.peek() + 1)
-# stack.push(stack.peek() + 1)
-# stack.push(stack.peek() + 1)
-# stack.push(stack.peek() + 1)
-# stack.push(stack.peek() + 1)
-# stack.push(stack.peek() + 1)
+# stack.add(stack.peek() + 1)
+# stack.add(stack.peek() + 2)
+# stack.add(stack.peek() + 3)
+# stack.add(stack.peek() + 4)
+# stack.add(stack.peek() + 5)
+# stack.add(stack.peek() + 6)
 # print(f'Check3 - {stack}')
